@@ -96,6 +96,12 @@ else
 fi
 d=$d-$BM_C-$BM_B
 
+if [[ -n $subdir ]]; then
+    print_header "DEPLOY $subdir/$d"
+else
+    print_header "DEPLOY $d"
+fi
+
 mkdir $d || exit 1
 for exeext in .exe .out; do
     f=$upx_BUILDDIR/upx$exeext
@@ -122,6 +128,7 @@ if [[ $new_branch == 1 ]]; then
     git checkout --orphan $branch
     git reset --hard
 fi
+git ls-files -v
 
 if [[ -n $subdir ]]; then
     [[ -d $subdir ]] || mkdir $subdir
@@ -140,7 +147,7 @@ fi
 now=$(date '+%s')
 ##date=$(TZ=UTC0 date -d "@$now" '+%Y-%m-%d %H:%M:%S')
 git commit --date="$now" -m "Automatic build $d"
-git ls-files
+git ls-files -v
 #git log --pretty=fuller
 
 umask 077

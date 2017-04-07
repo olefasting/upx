@@ -12,6 +12,7 @@ notifications: { email: { on_success: never, on_failure: change } }
   - llvm-toolchain-precise-3.6
   - llvm-toolchain-precise-3.7
   - llvm-toolchain-precise-3.8
+  - llvm-toolchain-precise-3.9
 
 env:
   global:
@@ -162,20 +163,28 @@ matrix:
       addons: { apt: { sources: *S, packages: [ "clang-3.8" ] } }
     - os: linux
       compiler: clang
-      env: C=clang-3.8-m64 B=debug+sanitize
-      addons: { apt: { sources: *S, packages: [ "clang-3.8" ] } }
+      env: C=clang-3.9-m32
+      addons: { apt: { sources: *S, packages: [ "clang-3.9", "g++-6-multilib", "zlib1g-dev:i386" ] } }
     - os: linux
       compiler: clang
-      env: C=clang-3.8-m64 B=sanitize
-      addons: { apt: { sources: *S, packages: [ "clang-3.8" ] } }
+      env: C=clang-3.9-m64
+      addons: { apt: { sources: *S, packages: [ "clang-3.9" ] } }
     - os: linux
       compiler: clang
-      env: C=clang-3.8-m64 B=debug+scan-build
-      addons: { apt: { sources: *S, packages: [ "clang-3.8" ] } }
+      env: C=clang-3.9-m64 B=debug+sanitize
+      addons: { apt: { sources: *S, packages: [ "clang-3.9" ] } }
     - os: linux
       compiler: clang
-      env: C=clang-3.8-m64 B=scan-build
-      addons: { apt: { sources: *S, packages: [ "clang-3.8" ] } }
+      env: C=clang-3.9-m64 B=sanitize
+      addons: { apt: { sources: *S, packages: [ "clang-3.9" ] } }
+    - os: linux
+      compiler: clang
+      env: C=clang-3.9-m64 B=debug+scan-build
+      addons: { apt: { sources: *S, packages: [ "clang-3.9" ] } }
+    - os: linux
+      compiler: clang
+      env: C=clang-3.9-m64 B=scan-build
+      addons: { apt: { sources: *S, packages: [ "clang-3.9" ] } }
     - os: linux
       compiler: gcc
       env: CROSS=arm-linux-gnueabi C=gcc-4.6 T=SKIP
@@ -211,13 +220,13 @@ matrix:
       compiler: clang
       env: C=clang-703-m64
     - os: osx
-      osx_image: xcode8.2
+      osx_image: xcode8.3
       compiler: clang
-      env: C=clang-800-m32
+      env: C=clang-802-m32
     - os: osx
-      osx_image: xcode8.2
+      osx_image: xcode8.3
       compiler: clang
-      env: C=clang-800-m64
+      env: C=clang-802-m64
 
 install:
   - uname -a; pwd; id; umask
@@ -247,6 +256,11 @@ install:
     fi
 
 script:
-  - cd $TRAVIS_BUILD_DIR && bash ./.github/travis_build.sh && bash ./.github/travis_testsuite_1.sh && bash ./.github/travis_deploy.sh
+  - failed=0
+  - cd $TRAVIS_BUILD_DIR || failed=1
+  - test $failed = 1 || bash ./.github/travis_build.sh || failed=1
+  - test $failed = 1 || bash ./.github/travis_testsuite_1.sh || failed=1
+  - test $failed = 1 || bash ./.github/travis_deploy.sh || failed=1
+  - test $failed = 0
 
 # vim:set ts=2 sw=2 et:
